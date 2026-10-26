@@ -1,0 +1,3 @@
+--- COMPANY PAYROLL REPORT ---
+ID: 2 | Name: Charan | Role: Developer | Dept: Software Developer  | Net Salary: $46350.00
+ID: 3 | Name: Saisriram | Role: Developer | Dept: Software Developer | Net Salary: $46350.00

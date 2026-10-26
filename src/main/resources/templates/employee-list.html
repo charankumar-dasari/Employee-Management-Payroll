@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management System</title>
+    <style>
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; color: #1f2937; padding: 40px 20px; line-height: 1.5; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        
+        .header-panel { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; }
+        .header-title { font-size: 28px; font-weight: 800; color: #4f46e5; letter-spacing: -0.5px; }
+        .header-subtitle { font-size: 14px; color: #6b7280; margin-top: 4px; }
+        .btn-group { display: flex; gap: 12px; }
+        
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; transition: all 0.2s ease; cursor: pointer; border: none; }
+        .btn-primary { background-color: #4f46e5; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
+        .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
+        .btn-success { background-color: #10b981; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+        .btn-success:hover { background-color: #059669; transform: translateY(-1px); }
+        
+        
+        .alert-box { padding: 16px; background-color: #ecfdf5; border: 1px solid #10b981; color: #065f46; border-radius: 8px; font-size: 14px; font-weight: 500; margin-bottom: 24px; }
+        
+        
+        .table-card { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e5e7eb; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background-color: #f9fafb; padding: 14px 20px; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
+        td { padding: 16px 20px; font-size: 14px; border-bottom: 1px solid #f3f4f6; color: #4b5563; vertical-align: middle; }
+        tr:hover { background-color: #f9fafb; }
+        .text-bold { font-weight: 600; color: #111827; }
+        .text-payout { font-weight: 700; color: #059669; }
+        
+        
+        .badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: 700; border-radius: 9999px; text-transform: uppercase; }
+        .badge-manager { background-color: #f3e8ff; color: #6b21a8; }
+        .badge-developer { background-color: #e0f2fe; color: #0369a1; }
+        
+        
+        .actions-cell { display: flex; gap: 16px; justify-content: center; }
+        .link-edit { color: #4f46e5; text-decoration: none; font-weight: 600; }
+        .link-edit:hover { text-decoration: underline; }
+        .link-delete { color: #ef4444; text-decoration: none; font-weight: 600; }
+        .link-delete:hover { text-decoration: underline; }
+        .empty-row { text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+    
+        <div class="header-panel">
+            <div>
+                <h1 class="header-title">Enterprise Payroll Dashboard</h1>
+                <p class="header-subtitle">Manage corporate personnel accounts and operational metrics dynamically.</p>
+            </div>
+            <div class="btn-group">
+                <a th:href="@{/employees/export}" class="btn btn-success">📥 Export Report</a>
+                <a th:href="@{/employees/add}" class="btn btn-primary">+ Add New Employee</a>
+            </div>
+        </div>
+
+        
+        <div th:if="${param.exported}" class="alert-box">
+            Success! The complete text file report was generated cleanly as 'Payroll_Report.txt' in your system workspace.
+        </div>
+
+        
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Role Type</th>
+                        <th>Base Salary</th>
+                        <th>Calculated Net Payout</th>
+                        <th style="text-align: center;">Operations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr th:each="emp : ${employees}">
+                        <td th:text="${emp.id}" style="color:#9ca3af; font-weight:500;">1</td>
+                        <td th:text="${emp.name}" class="text-bold">John Doe</td>
+                        <td th:text="${emp.department}">Engineering</td>
+                        <td>
+                            <span th:text="${emp.role}" 
+                                  th:class="${emp.role == 'Manager'} ? 'badge badge-manager' : 'badge badge-developer'">
+                                ROLE
+                            </span>
+                        </td>
+                        <td th:text="${'$' + #numbers.formatDecimal(emp.baseSalary, 1, 2)}">$0.00</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(emp.calculateNetSalary(), 1, 2)}" class="text-payout">$0.00</td>
+                        <td>
+                            <div class="actions-cell">
+                                <a th:href="@{/employees/edit/{id}(id=${emp.id})}" class="link-edit">Edit</a>
+                                <a th:href="@{/employees/delete/{id}(id=${emp.id})}" onclick="return confirm('Are you sure you want to remove this employee record?')" class="link-delete">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(employees)}">
+                        <td colspan="7" class="empty-row">
+                            No employees found in database storage. Click "+ Add New Employee" to insert records.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

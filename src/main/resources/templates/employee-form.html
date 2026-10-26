@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management Form</title>
+    <style>
+        /* Form Box Graphical Layout Model Setup */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; color: #1f2937; padding: 60px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .form-card { background: #ffffff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); width: 100%; max-width: 500px; padding: 40px; border: 1px solid #e5e7eb; }
+        .form-title { font-size: 24px; font-weight: 800; color: #111827; margin-bottom: 24px; border-bottom: 2px solid #f3f4f6; padding-bottom: 12px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #1f2937; outline: none; background-color: #ffffff; transition: border-color 0.2s, box-shadow 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+        
+        /* Bottom Layout Operations Bar alignment structure */
+        .actions-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; border-top: 2px solid #f3f4f6; padding-top: 20px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-size: 14px; transition: all 0.2s ease; cursor: pointer; border: none; }
+        .btn-cancel { background-color: #f3f4f6; color: #4b5563; }
+        .btn-cancel:hover { background-color: #e5e7eb; }
+        .btn-submit { background-color: #4f46e5; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
+        .btn-submit:hover { background-color: #4338ca; }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+        <!-- Title switches dynamically depending on new insertion vs update context -->
+        <h2 class="form-title" th:text="${employee.id == null ? 'Register New Staff Member' : 'Modify Record Files'}">Form Title</h2>
+        
+        <form th:action="@{/employees/save}" th:object="${employee}" method="POST">
+            <!-- Hidden context primary key tracker integration -->
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" th:field="*{name}" required placeholder="e.g. Alice Smith" />
+            </div>
+
+            <div class="form-group">
+                <label>Department Branch</label>
+                <input type="text" th:field="*{department}" required placeholder="e.g. Sales, Tech, HR" />
+            </div>
+
+            <div class="form-group">
+                <label>Role Classification</label>
+                <select th:field="*{role}" required>
+                    <option value="Developer">Developer</option>
+                    <option value="Manager">Manager</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Base Monthly Salary ($)</label>
+                <input type="number" step="0.01" th:field="*{baseSalary}" required placeholder="5000.00" />
+            </div>
+
+            <div class="actions-row">
+                <a th:href="@{/employees}" class="btn btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-submit">Save Employee Record</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
