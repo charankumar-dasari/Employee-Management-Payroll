@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle} + ' | PeopleFlow'">Employee Form | PeopleFlow</title>
+    <style>
+        :root {
+            --ink: #182230;
+            --muted: #687588;
+            --line: #e5eaf1;
+            --primary: #4f46e5;
+            --background: #f5f7fb;
+            --white: #fff;
+            --danger: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+        .topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--line);
+            padding: 18px 6%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand { font-weight: 800; font-size: 20px; }
+        .brand span { color: var(--primary); }
+        a { color: var(--primary); text-decoration: none; }
+        .wrap { max-width: 760px; margin: 38px auto; padding: 0 20px; }
+        .back { color: var(--muted); font-size: 14px; }
+        h1 { font-size: 28px; margin: 18px 0 8px; }
+        .sub { color: var(--muted); margin: 0 0 24px; }
+        .panel {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(20, 35, 60, .04);
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .field { display: flex; flex-direction: column; gap: 8px; }
+        .wide { grid-column: 1 / -1; }
+        label { font-size: 13px; font-weight: 700; }
+        input, select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d8deea;
+            border-radius: 9px;
+            background: white;
+            font: inherit;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+        }
+        .error { color: var(--danger); font-size: 12px; }
+        .alert {
+            border-radius: 9px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            background: #fff0ef;
+            color: var(--danger);
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 26px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 17px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid var(--line);
+            cursor: pointer;
+        }
+        .primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .secondary { background: white; color: var(--ink); }
+        @media(max-width: 580px) {
+            .grid { grid-template-columns: 1fr; }
+            .wide { grid-column: auto; }
+            .panel { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">People<span>Flow</span></div>
+    <a href="/employees">Back to dashboard</a>
+</header>
+
+<main class="wrap">
+    <a class="back" href="/employees">← Employees / Dashboard</a>
+    <h1 th:text="${pageTitle}">Add Employee</h1>
+    <p class="sub">Enter the employee details below. Payroll values are calculated automatically.</p>
+
+    <section class="panel">
+        <div class="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/employees/save}" th:object="${employee}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="grid">
+                <div class="field wide">
+                    <label for="name">Full name</label>
+                    <input id="name" type="text" th:field="*{name}"
+                           placeholder="e.g. Charan Kumar" maxlength="100" required>
+                    <span class="error" th:if="${#fields.hasErrors('name')}"
+                          th:errors="*{name}"></span>
+                </div>
+
+                <div class="field">
+                    <label for="department">Department</label>
+                    <input id="department" type="text" th:field="*{department}"
+                           placeholder="e.g. Engineering" maxlength="80" required>
+                    <span class="error" th:if="${#fields.hasErrors('department')}"
+                          th:errors="*{department}"></span>
+                </div>
+
+                <div class="field">
+                    <label for="role">Role</label>
+                    <select id="role" th:field="*{role}" required>
+                        <option value="">Select role</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                    <span class="error" th:if="${#fields.hasErrors('role')}"
+                          th:errors="*{role}"></span>
+                </div>
+
+                <div class="field wide">
+                    <label for="baseSalary">Monthly base salary (₹)</label>
+                    <input id="baseSalary" type="number" th:field="*{baseSalary}"
+                           min="0.01" step="0.01" placeholder="e.g. 35000" required>
+                    <span class="error" th:if="${#fields.hasErrors('baseSalary')}"
+                          th:errors="*{baseSalary}"></span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a class="btn secondary" href="/employees">Cancel</a>
+                <button class="btn primary" type="submit">Save employee</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

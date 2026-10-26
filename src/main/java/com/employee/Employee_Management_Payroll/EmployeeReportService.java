@@ -1,36 +1,81 @@
+
 package com.employee.Employee_Management_Payroll;
 
-import org.springframework.stereotype.Service;
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
 
 @Service
 public class EmployeeReportService {
 
-    public Employee searchById(List<Employee> employees, Long id) {
-        return employees.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + id));
+    private final EmployeeService employeeService;
+
+    public EmployeeReportService(EmployeeService employeeService) {
+        this.employeeService = employeeService;
     }
 
-    public List<Employee> searchByDepartment(List<Employee> employees, String department) {
-        return employees.stream()
-                .filter(e -> e.getDepartment().equalsIgnoreCase(department))
-                .collect(Collectors.toList());
-    }
+    public Path exportPayrollReport() throws IOException {
+        List<Employee> employees = employeeService.getAllEmployees();
 
-    public void exportPayrollReport(List<Employee> employees, String filename) {
-        try (FileWriter writer = new FileWriter(filename)) {
-            writer.write("--- COMPANY PAYROLL REPORT ---\n");
-            for (Employee e : employees) {
-                writer.write(String.format("ID: %d | Name: %s | Role: %s | Dept: %s | Net Salary: $%.2f\n",
-                        e.getId(), e.getName(), e.getRole(), e.getDepartment(), e.calculateNetSalary()));
+        Path directory = Paths.get("reports");
+        Files.createDirectories(directory);
+
+        String timestamp = LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+        Path file = directory.resolve(
+                "Payroll_Report_" + timestamp + ".csv");
+
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                file, StandardCharsets.UTF_8)) {
+
+            writer.write(
+                    "Employee ID,Name,Department,Role,Base Salary,Bonus,Deductions,Net Salary");
+            writer.newLine();
+
+            for (Employee employee : employees) {
+                writer.write(String.join(",",
+                        csv(String.valueOf(employee.getId())),
+                        csv(employee.getName()),
+                        csv(employee.getDepartment()),
+                        csv(employee.getRole()),
+                        money(employee.getBaseSalary()),
+                        money(employee.getBonus()),
+                        money(employee.getDeductions()),
+                        money(employee.getNetSalary())));
+                writer.newLine();
             }
-        } catch (IOException e) {
-            System.err.println("Failed to write report to file: " + e.getMessage());
+
+            writer.write(String.join(",",
+                    "TOTAL", "", "", "",
+                    money(employeeService.getTotalBaseSalary()),
+                    money(employeeService.getTotalBonus()),
+                    money(employeeService.getTotalDeductions()),
+                    money(employeeService.getTotalNetSalary())));
+            writer.newLine();
         }
+
+        return file;
+    }
+
+    private String money(Double amount) {
+        return String.format(java.util.Locale.US, "%.2f",
+                amount == null ? 0.0 : amount);
+    }
+
+    private String csv(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return "\"" + value.replace("\"", "\"\"") + "\"";
     }
 }

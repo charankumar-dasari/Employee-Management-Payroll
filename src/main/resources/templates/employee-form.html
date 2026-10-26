@@ -1,70 +1,160 @@
+
 <!DOCTYPE html>
-<html xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Employee Management Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle} + ' | PeopleFlow'">Employee Form | PeopleFlow</title>
     <style>
-        /* Form Box Graphical Layout Model Setup */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; color: #1f2937; padding: 60px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        
-        .form-card { background: #ffffff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); width: 100%; max-width: 500px; padding: 40px; border: 1px solid #e5e7eb; }
-        .form-title { font-size: 24px; font-weight: 800; color: #111827; margin-bottom: 24px; border-bottom: 2px solid #f3f4f6; padding-bottom: 12px; }
-        
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-        
-        input[type="text"], input[type="number"], select { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; color: #1f2937; outline: none; background-color: #ffffff; transition: border-color 0.2s, box-shadow 0.2s; }
-        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
-        
-        /* Bottom Layout Operations Bar alignment structure */
-        .actions-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; border-top: 2px solid #f3f4f6; padding-top: 20px; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-size: 14px; transition: all 0.2s ease; cursor: pointer; border: none; }
-        .btn-cancel { background-color: #f3f4f6; color: #4b5563; }
-        .btn-cancel:hover { background-color: #e5e7eb; }
-        .btn-submit { background-color: #4f46e5; color: #ffffff; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
-        .btn-submit:hover { background-color: #4338ca; }
+        :root {
+            --ink: #182230;
+            --muted: #687588;
+            --line: #e5eaf1;
+            --primary: #4f46e5;
+            --background: #f5f7fb;
+            --white: #fff;
+            --danger: #b42318;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+        .topbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--line);
+            padding: 18px 6%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand { font-weight: 800; font-size: 20px; }
+        .brand span { color: var(--primary); }
+        a { color: var(--primary); text-decoration: none; }
+        .wrap { max-width: 760px; margin: 38px auto; padding: 0 20px; }
+        .back { color: var(--muted); font-size: 14px; }
+        h1 { font-size: 28px; margin: 18px 0 8px; }
+        .sub { color: var(--muted); margin: 0 0 24px; }
+        .panel {
+            background: var(--white);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(20, 35, 60, .04);
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .field { display: flex; flex-direction: column; gap: 8px; }
+        .wide { grid-column: 1 / -1; }
+        label { font-size: 13px; font-weight: 700; }
+        input, select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d8deea;
+            border-radius: 9px;
+            background: white;
+            font: inherit;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+        }
+        .error { color: var(--danger); font-size: 12px; }
+        .alert {
+            border-radius: 9px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            background: #fff0ef;
+            color: var(--danger);
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 26px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 17px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid var(--line);
+            cursor: pointer;
+        }
+        .primary { background: var(--primary); color: white; border-color: var(--primary); }
+        .secondary { background: white; color: var(--ink); }
+        @media(max-width: 580px) {
+            .grid { grid-template-columns: 1fr; }
+            .wide { grid-column: auto; }
+            .panel { padding: 20px; }
+        }
     </style>
 </head>
 <body>
+<header class="topbar">
+    <div class="brand">People<span>Flow</span></div>
+    <a href="/employees">Back to dashboard</a>
+</header>
 
-    <div class="form-card">
-        <!-- Title switches dynamically depending on new insertion vs update context -->
-        <h2 class="form-title" th:text="${employee.id == null ? 'Register New Staff Member' : 'Modify Record Files'}">Form Title</h2>
-        
-        <form th:action="@{/employees/save}" th:object="${employee}" method="POST">
-            <!-- Hidden context primary key tracker integration -->
-            <input type="hidden" th:field="*{id}" />
+<main class="wrap">
+    <a class="back" href="/employees">← Employees / Dashboard</a>
+    <h1 th:text="${pageTitle}">Add Employee</h1>
+    <p class="sub">Enter the employee details below. Payroll values are calculated automatically.</p>
 
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" th:field="*{name}" required placeholder="e.g. Alice Smith" />
+    <section class="panel">
+        <div class="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/employees/save}" th:object="${employee}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="grid">
+                <div class="field wide">
+                    <label for="name">Full name</label>
+                    <input id="name" type="text" th:field="*{name}"
+                           placeholder="e.g. Charan Kumar" maxlength="100" required>
+                    <span class="error" th:if="${#fields.hasErrors('name')}"
+                          th:errors="*{name}"></span>
+                </div>
+
+                <div class="field">
+                    <label for="department">Department</label>
+                    <input id="department" type="text" th:field="*{department}"
+                           placeholder="e.g. Engineering" maxlength="80" required>
+                    <span class="error" th:if="${#fields.hasErrors('department')}"
+                          th:errors="*{department}"></span>
+                </div>
+
+                <div class="field">
+                    <label for="role">Role</label>
+                    <select id="role" th:field="*{role}" required>
+                        <option value="">Select role</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                    <span class="error" th:if="${#fields.hasErrors('role')}"
+                          th:errors="*{role}"></span>
+                </div>
+
+                <div class="field wide">
+                    <label for="baseSalary">Monthly base salary (₹)</label>
+                    <input id="baseSalary" type="number" th:field="*{baseSalary}"
+                           min="0.01" step="0.01" placeholder="e.g. 35000" required>
+                    <span class="error" th:if="${#fields.hasErrors('baseSalary')}"
+                          th:errors="*{baseSalary}"></span>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Department Branch</label>
-                <input type="text" th:field="*{department}" required placeholder="e.g. Sales, Tech, HR" />
-            </div>
-
-            <div class="form-group">
-                <label>Role Classification</label>
-                <select th:field="*{role}" required>
-                    <option value="Developer">Developer</option>
-                    <option value="Manager">Manager</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Base Monthly Salary ($)</label>
-                <input type="number" step="0.01" th:field="*{baseSalary}" required placeholder="5000.00" />
-            </div>
-
-            <div class="actions-row">
-                <a th:href="@{/employees}" class="btn btn-cancel">Cancel</a>
-                <button type="submit" class="btn btn-submit">Save Employee Record</button>
+            <div class="actions">
+                <a class="btn secondary" href="/employees">Cancel</a>
+                <button class="btn primary" type="submit">Save employee</button>
             </div>
         </form>
-    </div>
-
+    </section>
+</main>
 </body>
 </html>

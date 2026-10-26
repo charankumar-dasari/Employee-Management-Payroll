@@ -1,66 +1,100 @@
+
 package com.employee.Employee_Management_Payroll;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/employees")
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestController
+@RequestMapping("/api/employees")
 public class EmployeeController {
-    
-    @Autowired
-    private EmployeeService service;
 
-    @Autowired
-    private EmployeeReportService reportService;
+    private final EmployeeService employeeService;
 
-    // View Dashboard
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
     @GetMapping
-    public String listEmployees(Model model) {
-        List<Employee> employees = service.getAllEmployees();
-        model.addAttribute("employees", employees);
-        return "employee-list";
+    public List<Employee> getEmployees(
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(required = false, defaultValue = "") String department,
+            @RequestParam(required = false, defaultValue = "") String role,
+            @RequestParam(required = false, defaultValue = "newest") String sortBy) {
+
+        return employeeService.searchEmployees(
+                keyword, department, role, sortBy);
     }
 
-    
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("employee", new Employee());
-        return "employee-form";
-    }
-
-    
-    @PostMapping("/save")
-    public String saveEmployee(@ModelAttribute("employee") Employee employee) {
-        service.saveEmployee(employee);
-        return "redirect:/employees";
-    }
-
-    
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        Employee employee = service.getEmployeeById(id);
-        if (employee != null) {
-            model.addAttribute("employee", employee);
-            return "employee-form";
+    @GetMapping("/{id}")
+    public Employee getEmployee(@PathVariable Long id) {
+        try {
+            return employeeService.getEmployeeById(id);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exception.getMessage());
         }
-        return "redirect:/employees";
     }
 
-    
-    @GetMapping("/delete/{id}")
-    public String deleteEmployee(@PathVariable Long id) {
-        service.deleteEmployee(id);
-        return "redirect:/employees";
+    @PostMapping
+    public ResponseEntity<Employee> createEmployee(
+            @Valid @RequestBody Employee employee) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(employeeService.saveEmployee(employee));
     }
 
-    
-    @GetMapping("/export")
-    public String exportReport() {
-        List<Employee> employees = service.getAllEmployees();
-        reportService.exportPayrollReport(employees, "Payroll_Report.txt");
-        return "redirect:/employees?exported=true";
+    @PutMapping("/{id}")
+    public Employee updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody Employee employee) {
+        try {
+            return employeeService.updateEmployee(id, employee);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        try {
+            employeeService.deleteEmployee(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+    }
+
+    @GetMapping("/summary")
+    public Map<String, Object> getSummary() {
+        return Map.of(
+                "totalEmployees", employeeService.getTotalEmployees(),
+                "totalBaseSalary", employeeService.getTotalBaseSalary(),
+                "totalBonus", employeeService.getTotalBonus(),
+                "totalDeductions", employeeService.getTotalDeductions(),
+                "totalNetSalary", employeeService.getTotalNetSalary(),
+                "managerCount", employeeService.getManagerCount(),
+                "developerCount", employeeService.getDeveloperCount()
+        );
+    }
+
+    @GetMapping("/departments")
+    public List<String> getDepartments() {
+        return employeeService.getDepartments();
     }
 }

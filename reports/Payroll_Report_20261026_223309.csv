@@ -1,0 +1,4 @@
+Employee ID,Name,Department,Role,Base Salary,Bonus,Deductions,Net Salary
+"2","Sriram","Tester","Developer",35000.00,5250.00,4200.00,36050.00
+"1","Charan","Software Developer","Developer",40000.00,6000.00,4800.00,41200.00
+TOTAL,,,,75000.00,11250.00,9000.00,77250.00
